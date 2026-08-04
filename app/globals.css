@@ -128,3 +128,9 @@
     @apply font-sans;
   }
 }
+
+.bg-auth {
+  background-image: url("/bacground-auth.png");
+  background-size: cover;
+  background-position: center;
+}
