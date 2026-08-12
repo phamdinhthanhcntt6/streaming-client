@@ -6,7 +6,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-neutral-900 bg-opacity-95 p-4 sm:p-8 bg-auth">
+    <div className="flex flex-1 items-center justify-center bg-neutral-900 bg-opacity-95 p-4 sm:p-8 bg-auth">
       {/* 2-column container */}
       <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden h-auto min-h-150">
         {/* Left column: Form content */}

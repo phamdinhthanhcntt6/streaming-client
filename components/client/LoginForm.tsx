@@ -43,7 +43,7 @@ export default function LoginForm() {
       }
 
       toast.success(data?.message || "Login successful");
-      router.push("/home");
+      router.push("/music");
     } catch (err: any) {
       toast.error(
         err.response?.data?.message || "Login failed. Please try again.",

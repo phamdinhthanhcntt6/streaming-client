@@ -13,9 +13,9 @@ export function middleware(request: NextRequest) {
   // Get token from Cookie
   const token = request.cookies.get("access_token")?.value;
 
-  // CHECK 1: Logged in but trying to access /login -> Redirect to home '/'
+  // CHECK 1: Logged in but trying to access an auth page -> Redirect to music
   if (token && authRoutes.includes(pathname)) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/music", request.url));
   }
 
   // CHECK 2: Not logged in but trying to access protected route -> Redirect to /login

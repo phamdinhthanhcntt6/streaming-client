@@ -1,10 +1,10 @@
+import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
+variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
@@ -26,7 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="mx-auto flex min-h-screen w-full max-w-360 flex-col">
         {children}
         <Toaster position="top-right" richColors closeButton />
       </body>

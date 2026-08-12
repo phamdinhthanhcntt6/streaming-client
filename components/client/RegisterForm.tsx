@@ -48,7 +48,7 @@ export default function RegisterForm() {
 
       const data = await authService.register(payload);
       toast.success(data?.message || "Registration successful");
-      router.push("/home");
+      router.push("/music");
     } catch (err: any) {
       toast.error(
         err.response?.data?.message || "Registration failed. Please try again.",
