@@ -1,11 +1,11 @@
-import Link from "next/link";
-import { Hexagon } from "lucide-react";
 import LoginForm from "@/components/client/LoginForm";
+import Logo from "@/components/shared/Logo";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const metadata = {
-  title: "Đăng nhập | Streaming App",
-  description: "Đăng nhập vào tài khoản của bạn",
+  title: "Login | Streaming App",
+  description: "Log in to your account",
 };
 
 export default function LoginPage() {
@@ -13,13 +13,11 @@ export default function LoginPage() {
     <div className="w-full max-w-md mx-auto">
       {/* Logo & Header */}
       <div className="flex flex-col items-center space-y-4 text-center mb-8">
-        <div className="w-16 h-16 bg-emerald-400 text-white rounded-lg flex items-center justify-center transform rotate-45 mb-2 shadow-lg">
-          <Hexagon className="w-8 h-8 -rotate-45" fill="currentColor" />
-        </div>
+        <Logo />
 
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">
-            Welcomeback
+            Welcome back
           </h1>
           <p className="text-sm text-gray-500">
             Dont have an account?{" "}

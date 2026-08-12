@@ -4,49 +4,54 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  authService,
-  LoginCredentials,
-  loginSchema,
-} from "@/services/auth.service";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
+import { authService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react"; // assuming lucide-react is used for icons
 import { toast } from "sonner";
 
-export default function LoginForm() {
+const registerSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type RegisterCredentials = z.infer<typeof registerSchema>;
+
+export default function RegisterForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginCredentials>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterCredentials>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = async (values: LoginCredentials) => {
+  const onSubmit = async (values: RegisterCredentials) => {
     try {
       setIsLoading(true);
 
-      const data = await authService.login(values);
+      const payload = {
+        ...values,
+        displayName: values.email.split("@")[0],
+      };
 
-      if (data?.accessToken) {
-        localStorage.setItem("access_token", data.accessToken);
-      }
-
-      toast.success(data?.message || "Login successful");
+      const data = await authService.register(payload);
+      toast.success(data?.message || "Registration successful");
       router.push("/home");
     } catch (err: any) {
       toast.error(
-        err.response?.data?.message || "Login failed. Please try again.",
+        err.response?.data?.message || "Registration failed. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -77,14 +82,23 @@ export default function LoginForm() {
         <Label htmlFor="password" className="font-semibold text-gray-700">
           Password
         </Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Your password"
-          {...register("password")}
-          disabled={isLoading}
-          className="bg-gray-50 border-gray-200 h-11"
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Your password"
+            {...register("password")}
+            disabled={isLoading}
+            className="bg-gray-50 border-gray-200 h-11 pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
         {errors.password && (
           <p className="text-sm font-medium text-destructive">
             {errors.password.message}
@@ -97,17 +111,8 @@ export default function LoginForm() {
         className="w-full h-11 font-semibold bg-[#A1ABB2] hover:bg-gray-500 text-white rounded-md mt-4"
         disabled={isLoading}
       >
-        {isLoading ? "Processing..." : "Log in"}
+        {isLoading ? "Creating..." : "Create account"}
       </Button>
-
-      <div className="mt-4 text-center">
-        <Link
-          href="/forgot-password"
-          className="text-sm font-medium text-gray-500 hover:text-gray-900 underline underline-offset-4"
-        >
-          Forget password?
-        </Link>
-      </div>
     </form>
   );
 }

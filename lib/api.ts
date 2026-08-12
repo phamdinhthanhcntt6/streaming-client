@@ -1,19 +1,20 @@
 import axios from 'axios';
 
-// Lấy base URL từ biến môi trường, hoặc dùng default
+// Get base URL from environment variable, or use default
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export const api = axios.create({
   baseURL: BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request Interceptor: Thêm token vào headers nếu có
+// Request Interceptor: Add token to headers if present
 api.interceptors.request.use(
   (config) => {
-    // Lấy token từ localStorage (chỉ chạy trên Client)
+    // Get token from localStorage (runs on Client only)
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('access_token');
       if (token && config.headers) {
@@ -27,15 +28,15 @@ api.interceptors.request.use(
   }
 );
 
-// Response Interceptor: Xử lý lỗi chung
+// Response Interceptor: Global error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Xử lý token hết hạn, xoá token khỏi storage
+      // Handle expired token, remove token from storage
       if (typeof window !== 'undefined') {
         localStorage.removeItem('access_token');
-        // window.location.href = '/login'; // Có thể bật lên nếu muốn auto redirect
+        // window.location.href = '/login'; // Can be enabled if you want auto redirect
       }
     }
     return Promise.reject(error);

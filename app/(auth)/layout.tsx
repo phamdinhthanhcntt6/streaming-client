@@ -7,14 +7,14 @@ export default function AuthLayout({
 }>) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-neutral-900 bg-opacity-95 p-4 sm:p-8 bg-auth">
-      {/* Container 2 cột */}
+      {/* 2-column container */}
       <div className="flex w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden h-auto min-h-150">
-        {/* Cột trái: Form nội dung */}
+        {/* Left column: Form content */}
         <div className="w-full lg:w-1/2 p-8 sm:p-12 flex flex-col justify-center">
           {children}
         </div>
 
-        {/* Cột phải: Hình ảnh (Ẩn trên màn hình nhỏ) */}
+        {/* Right column: Image (Hidden on small screens) */}
         <div className="hidden lg:block lg:w-1/2 p-4">
           <Image
             src="/image-auth.png"

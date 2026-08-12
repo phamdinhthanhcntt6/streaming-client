@@ -1,9 +1,5 @@
-// Cấu hình SEO cho trang chủ
-export const metadata = {
-  title: "Trang chủ | Streaming App",
-  description: "Khám phá các luồng trực tiếp hấp dẫn nhất",
-};
+import { redirect } from "next/navigation";
 
-export default function Home() {
-  return <>Streaming web</>;
+export default function RootPage() {
+  redirect("/home");
 }
