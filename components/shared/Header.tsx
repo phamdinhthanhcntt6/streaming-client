@@ -1,5 +1,8 @@
+"use client";
+
 import { Menu, Search, Upload } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -7,18 +10,42 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import Logo from "./Logo";
 import { checkAuthen } from "@/utilts/checkAuthen";
-import { Avatar, AvatarFallback, AvatarGroup, AvatarImage } from "../ui/avatar";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarImage } from "../ui/avatar";
+import Logo from "./Logo";
 
 const navItems = [
   { label: "Music", href: "/music" },
-  { label: "Videos", href: "/videos" },
+  { label: "Video", href: "/video" },
   { label: "Marketplace", href: "/marketplace" },
   { label: "Voting", href: "/voting" },
 ];
 
 const Header = () => {
+  const pathname = usePathname();
+
+  const renderNavItem = (item: (typeof navItems)[number]) => {
+    const isActive =
+      pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        aria-current={isActive ? "page" : undefined}
+        className={cn(
+          "mx-4 flex h-12 -translate-y-5 items-center justify-center rounded-2xl text-sm font-semibold uppercase tracking-wide transition-colors lg:mx-8",
+          isActive
+            ? "bg-[#01579B] text-white hover:bg-[#014b87]"
+            : "text-slate-400 hover:bg-slate-50 hover:text-[#01579B]",
+        )}
+      >
+        {item.label}
+      </Link>
+    );
+  };
+
   return (
     <header className="relative z-20 shrink-0 border-b border-border bg-white text-slate-600 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
       <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-8 lg:px-14">
@@ -56,7 +83,10 @@ const Header = () => {
         </Link>
 
         {checkAuthen() ? (
-          <>
+          <Link
+            href="/setting"
+            className="flex flex-1 items-center justify-end gap-2 sm:gap-4 cursor-pointer"
+          >
             <Avatar>
               <AvatarImage
                 src="https://github.com/shadcn.png"
@@ -64,7 +94,7 @@ const Header = () => {
                 className="grayscale"
               />
             </Avatar>
-          </>
+          </Link>
         ) : (
           <div className="flex flex-1 items-center justify-end gap-2 sm:gap-4">
             <Button
@@ -90,35 +120,15 @@ const Header = () => {
         aria-label="Primary navigation"
         className="relative hidden h-14 border-t border-slate-100 md:grid md:grid-cols-[1fr_1fr_7rem_1fr_1fr] md:items-center lg:grid-cols-[1fr_1fr_9rem_1fr_1fr]"
       >
-        <Link
-          href={navItems[0].href}
-          className="flex h-full -translate-y-5 items-center justify-center text-sm font-semibold uppercase tracking-wide text-slate-400 transition-colors hover:text-[#09bcae]"
-        >
-          {navItems[0].label}
-        </Link>
-        <Link
-          href={navItems[1].href}
-          className="flex h-full -translate-y-5 items-center justify-center text-sm font-semibold uppercase tracking-wide text-slate-400 transition-colors hover:text-[#09bcae]"
-        >
-          {navItems[1].label}
-        </Link>
+        {renderNavItem(navItems[0])}
+        {renderNavItem(navItems[1])}
 
         <div className="flex h-full -translate-y-5 items-center justify-center">
           <Logo />
         </div>
 
-        <Link
-          href={navItems[2].href}
-          className="flex h-full -translate-y-5 items-center justify-center text-sm font-semibold uppercase tracking-wide text-slate-400 transition-colors hover:text-[#09bcae]"
-        >
-          {navItems[2].label}
-        </Link>
-        <Link
-          href={navItems[3].href}
-          className="flex h-full -translate-y-5 items-center justify-center text-sm font-semibold uppercase tracking-wide text-slate-400 transition-colors hover:text-[#09bcae]"
-        >
-          {navItems[3].label}
-        </Link>
+        {renderNavItem(navItems[2])}
+        {renderNavItem(navItems[3])}
       </nav>
     </header>
   );

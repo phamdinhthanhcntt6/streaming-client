@@ -134,3 +134,7 @@
   background-size: cover;
   background-position: center;
 }
+
+.tabs-trigger {
+  text-decoration: underline !important;
+}
