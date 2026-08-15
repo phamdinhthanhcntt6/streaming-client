@@ -16,7 +16,6 @@ const AccountTab = () => {
       setIsLoggingOut(true);
 
       const data = await authService.logout();
-      localStorage.removeItem("access_token");
 
       toast.success(data?.message || "Logged out successfully");
       router.replace("/login");

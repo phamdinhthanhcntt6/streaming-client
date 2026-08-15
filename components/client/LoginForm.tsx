@@ -38,10 +38,6 @@ export default function LoginForm() {
 
       const data = await authService.login(values);
 
-      if (data?.accessToken) {
-        localStorage.setItem("access_token", data.accessToken);
-      }
-
       toast.success(data?.message || "Login successful");
       router.push("/music");
     } catch (err: any) {

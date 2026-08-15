@@ -3,6 +3,7 @@
 import { Menu, Search, Upload } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,8 +11,8 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { checkAuthen } from "@/utilts/checkAuthen";
 import { cn } from "@/lib/utils";
+import { authService } from "@/services/auth.service";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import Logo from "./Logo";
 
@@ -24,6 +25,27 @@ const navItems = [
 
 const Header = () => {
   const pathname = usePathname();
+  const [currentUser, setCurrentUser] = useState<{
+    displayName: string;
+    avatarUrl?: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    authService
+      .me()
+      .then((data) => {
+        if (isMounted) setCurrentUser(data.user);
+      })
+      .catch(() => {
+        if (isMounted) setCurrentUser(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [pathname]);
 
   const renderNavItem = (item: (typeof navItems)[number]) => {
     const isActive =
@@ -82,15 +104,15 @@ const Header = () => {
           LOGO
         </Link>
 
-        {checkAuthen() ? (
+        {currentUser ? (
           <Link
             href="/setting"
             className="flex flex-1 items-center justify-end gap-2 sm:gap-4 cursor-pointer"
           >
             <Avatar>
               <AvatarImage
-                src="https://github.com/shadcn.png"
-                alt="@shadcn"
+                src={currentUser.avatarUrl || "https://github.com/shadcn.png"}
+                alt={currentUser.displayName}
                 className="grayscale"
               />
             </Avatar>
