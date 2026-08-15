@@ -3,7 +3,7 @@
 import { Menu, Search, Upload } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +12,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
-import { authService } from "@/services/auth.service";
+import { useAuthStore } from "@/stores/auth.store";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import Logo from "./Logo";
 
@@ -25,27 +25,13 @@ const navItems = [
 
 const Header = () => {
   const pathname = usePathname();
-  const [currentUser, setCurrentUser] = useState<{
-    displayName: string;
-    avatarUrl?: string | null;
-  } | null>(null);
+  const currentUser = useAuthStore((state) => state.user);
+  const authStatus = useAuthStore((state) => state.status);
+  const fetchMe = useAuthStore((state) => state.fetchMe);
 
   useEffect(() => {
-    let isMounted = true;
-
-    authService
-      .me()
-      .then((data) => {
-        if (isMounted) setCurrentUser(data.user);
-      })
-      .catch(() => {
-        if (isMounted) setCurrentUser(null);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [pathname]);
+    void fetchMe();
+  }, [fetchMe]);
 
   const renderNavItem = (item: (typeof navItems)[number]) => {
     const isActive =
@@ -104,9 +90,14 @@ const Header = () => {
           LOGO
         </Link>
 
-        {currentUser ? (
+        {authStatus === "idle" || authStatus === "loading" ? (
+          <div
+            className="ml-auto size-10 animate-pulse rounded-full bg-slate-200"
+            aria-label="Loading account"
+          />
+        ) : currentUser ? (
           <Link
-            href="/setting"
+            href="/setting?tab=account"
             className="flex flex-1 items-center justify-end gap-2 sm:gap-4 cursor-pointer"
           >
             <Avatar>

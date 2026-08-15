@@ -15,9 +15,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useAuthStore } from "@/stores/auth.store";
 
 export default function LoginForm() {
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -37,6 +39,7 @@ export default function LoginForm() {
       setIsLoading(true);
 
       const data = await authService.login(values);
+      setUser(data.user);
 
       toast.success(data?.message || "Login successful");
       router.push("/music");
