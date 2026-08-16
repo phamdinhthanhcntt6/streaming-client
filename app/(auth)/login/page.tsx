@@ -1,4 +1,4 @@
-import LoginForm from "@/components/client/LoginForm";
+import LoginForm from "@/components/client/auth/login/LoginForm";
 import Logo from "@/components/shared/Logo";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";

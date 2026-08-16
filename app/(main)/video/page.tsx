@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
+
 const VideoPage = () => {
-  return <div>Video</div>;
+  redirect("/#video");
 };
 
 export default VideoPage;

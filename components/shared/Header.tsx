@@ -3,7 +3,7 @@
 import { Menu, Search, Upload } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { type MouseEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,14 +17,15 @@ import { Avatar, AvatarImage } from "../ui/avatar";
 import Logo from "./Logo";
 
 const navItems = [
-  { label: "Music", href: "/music" },
-  { label: "Video", href: "/video" },
+  { label: "Music", href: "/#music" },
+  { label: "Video", href: "/#video" },
   { label: "Marketplace", href: "/marketplace" },
   { label: "Voting", href: "/voting" },
 ];
 
 const Header = () => {
   const pathname = usePathname();
+  const [activeSection, setActiveSection] = useState<string | null>(null);
   const currentUser = useAuthStore((state) => state.user);
   const authStatus = useAuthStore((state) => state.status);
   const fetchMe = useAuthStore((state) => state.fetchMe);
@@ -33,14 +34,49 @@ const Header = () => {
     void fetchMe();
   }, [fetchMe]);
 
+  useEffect(() => {
+    const syncActiveSection = () => {
+      setActiveSection(window.location.hash.slice(1) || "music");
+    };
+
+    syncActiveSection();
+    window.addEventListener("hashchange", syncActiveSection);
+    window.addEventListener("popstate", syncActiveSection);
+
+    return () => {
+      window.removeEventListener("hashchange", syncActiveSection);
+      window.removeEventListener("popstate", syncActiveSection);
+    };
+  }, [pathname]);
+
+  const handleSectionNavigation = (
+    event: MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    if (pathname !== "/" || !href.startsWith("/#")) return;
+
+    const section = document.getElementById(href.slice(2));
+    if (!section) return;
+
+    event.preventDefault();
+    window.history.pushState(null, "", href);
+    setActiveSection(href.slice(2));
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const renderNavItem = (item: (typeof navItems)[number]) => {
-    const isActive =
-      pathname === item.href || pathname.startsWith(`${item.href}/`);
+    const sectionId = item.href.startsWith("/#") ? item.href.slice(2) : null;
+    const isActive = sectionId
+      ? pathname === "/" &&
+        (activeSection === sectionId ||
+          (activeSection === null && sectionId === "music"))
+      : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
     return (
       <Link
         key={item.href}
         href={item.href}
+        onClick={(event) => handleSectionNavigation(event, item.href)}
         aria-current={isActive ? "page" : undefined}
         className={cn(
           "mx-4 flex h-12 -translate-y-5 items-center justify-center rounded-2xl text-sm font-semibold uppercase tracking-wide transition-colors lg:mx-8",
@@ -55,7 +91,7 @@ const Header = () => {
   };
 
   return (
-    <header className="relative z-20 shrink-0 border-b border-border bg-white text-slate-600 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
+    <header className="sticky top-0 z-50 shrink-0 border-b border-border bg-white text-slate-600 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
       <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-8 lg:px-14">
         <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-5">
           <Button
@@ -84,7 +120,7 @@ const Header = () => {
         </div>
 
         <Link
-          href="/music"
+          href="/"
           className="text-base font-bold text-[#09bcae] md:hidden"
         >
           LOGO

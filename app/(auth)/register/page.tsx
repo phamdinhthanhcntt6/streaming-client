@@ -1,4 +1,4 @@
-import RegisterForm from "@/components/client/RegisterForm";
+import RegisterForm from "@/components/client/auth/register/RegisterForm";
 import Logo from "@/components/shared/Logo";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";

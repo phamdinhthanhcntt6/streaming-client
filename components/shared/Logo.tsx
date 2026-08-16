@@ -3,8 +3,8 @@ import Link from "next/link";
 const Logo = () => {
   return (
     <Link
-      href="/music"
-      aria-label="Streaming Web music page"
+      href="/"
+      aria-label="Streaming Web home page"
       className="group relative z-10 grid size-20 place-items-center bg-[#09bcae] transition-transform hover:scale-105 lg:size-24"
       style={{
         clipPath:
