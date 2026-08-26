@@ -1,5 +1,6 @@
 "use client";
 
+import FireIcon from "@/components/icons/FireIcon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   type ChartMovement,
@@ -10,19 +11,19 @@ import {
   musicService,
 } from "@/services/music.service";
 import { useAuthStore } from "@/stores/auth.store";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ChevronDown,
-  Flame,
   Heart,
   Link,
   Minus,
   MoreHorizontal,
   Music2,
+  MusicIcon,
   Play,
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 const periodOptions: Array<{ label: string; value: ChartPeriod }> = [
@@ -67,16 +68,14 @@ function ArtistChart({
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
-    <section className="min-w-0 rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:p-4">
+    <section className="flex h-184 min-w-0 flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:p-4">
       <h2 className="px-2 pb-3 text-xl font-bold text-slate-800 sm:text-2xl">
         {title}{" "}
         <span className="font-semibold text-slate-500">{entries.length}</span>
       </h2>
-      <div className="space-y-1">
-        {entries.map((entry, index) => {
-          const selected = selectedId
-            ? selectedId === entry.artist.id
-            : index === 1;
+      <div className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {entries.map((entry) => {
+          const selected = selectedId === entry.artist.id;
 
           return (
             <button
@@ -131,10 +130,10 @@ function TrendingChart({
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
 
   return (
-    <section className="min-w-0 rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:p-4">
+    <section className="flex h-184 min-w-0 flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:p-4">
       <div className="flex flex-col gap-3 px-2 pb-3 sm:flex-row sm:items-center">
         <h2 className="flex shrink-0 items-center gap-2 text-xl font-bold text-slate-800 sm:text-2xl">
-          <Flame className="size-7 fill-orange-500 text-orange-500" />
+          <FireIcon />
           Hot trending
         </h2>
         <div className="flex items-center gap-5 sm:ml-2">
@@ -155,11 +154,9 @@ function TrendingChart({
         </div>
       </div>
 
-      <div className="space-y-1">
-        {entries.map((entry, index) => {
-          const selected = selectedTrackId
-            ? selectedTrackId === entry.track.id
-            : index === 1;
+      <div className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain scrollbar-none [&::-webkit-scrollbar]:hidden">
+        {entries.map((entry) => {
+          const selected = selectedTrackId === entry.track.id;
 
           return (
             <div
@@ -268,87 +265,88 @@ function DashboardSkeleton() {
   );
 }
 
+const setFavoriteInDashboard = (
+  data: MusicDashboardData,
+  trackId: string,
+  isFavorite: boolean,
+): MusicDashboardData => ({
+  ...data,
+  trending: data.trending.map((item) =>
+    item.track.id === trackId
+      ? {
+          ...item,
+          track: {
+            ...item.track,
+            isFavorite,
+            favoriteCount: Math.max(
+              0,
+              item.track.favoriteCount + (isFavorite ? 1 : -1),
+            ),
+          },
+        }
+      : item,
+  ),
+});
+
 export default function MusicDashboard() {
   const [period, setPeriod] = useState<ChartPeriod>("DAILY");
-  const [dashboard, setDashboard] = useState<MusicDashboardData | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const authStatus = useAuthStore((state) => state.status);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (authStatus === "idle" || authStatus === "loading") return;
+  const authResolved =
+    authStatus === "authenticated" || authStatus === "unauthenticated";
+  const dashboardKey = ["music-dashboard", period, authStatus] as const;
 
-    let active = true;
+  const { data: dashboard, isError } = useQuery({
+    queryKey: dashboardKey,
+    queryFn: () => musicService.getDashboard(period),
+    enabled: authResolved,
+  });
 
-    musicService
-      .getDashboard(period)
-      .then((data) => {
-        if (active) {
-          setDashboard(data);
-          setError(null);
-        }
-      })
-      .catch(() => {
-        if (active) setError("Unable to load music charts. Please try again.");
-      });
+  const favoriteMutation = useMutation({
+    mutationFn: (entry: RankedTrack) =>
+      entry.track.isFavorite
+        ? musicService.removeFavorite(entry.track.id)
+        : musicService.addFavorite(entry.track.id),
+    onMutate: async (entry) => {
+      await queryClient.cancelQueries({ queryKey: dashboardKey });
+      const previous =
+        queryClient.getQueryData<MusicDashboardData>(dashboardKey);
 
-    return () => {
-      active = false;
-    };
-  }, [period, authStatus]);
+      queryClient.setQueryData<MusicDashboardData>(dashboardKey, (current) =>
+        current
+          ? setFavoriteInDashboard(
+              current,
+              entry.track.id,
+              !entry.track.isFavorite,
+            )
+          : current,
+      );
 
-  const handlePeriodChange = (nextPeriod: ChartPeriod) => {
-    setError(null);
-    setPeriod(nextPeriod);
-  };
+      return { previous };
+    },
+    onError: (_error, _entry, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(dashboardKey, context.previous);
+      }
+      toast.error("Unable to update favorite. Please try again.");
+    },
+  });
 
-  const handleFavorite = async (entry: RankedTrack) => {
+  const handleFavorite = (entry: RankedTrack) => {
     if (authStatus !== "authenticated") {
       toast.error("Please sign in to save favorite tracks.");
       return;
     }
 
-    const nextFavorite = !entry.track.isFavorite;
-    const updateFavorite = (value: boolean) => {
-      setDashboard((current) =>
-        current
-          ? {
-              ...current,
-              trending: current.trending.map((item) =>
-                item.track.id === entry.track.id
-                  ? {
-                      ...item,
-                      track: {
-                        ...item.track,
-                        isFavorite: value,
-                        favoriteCount: Math.max(
-                          0,
-                          item.track.favoriteCount + (value ? 1 : -1),
-                        ),
-                      },
-                    }
-                  : item,
-              ),
-            }
-          : current,
-      );
-    };
-
-    updateFavorite(nextFavorite);
-
-    try {
-      if (nextFavorite) await musicService.addFavorite(entry.track.id);
-      else await musicService.removeFavorite(entry.track.id);
-    } catch {
-      updateFavorite(!nextFavorite);
-      toast.error("Unable to update favorite. Please try again.");
-    }
+    favoriteMutation.mutate(entry);
   };
 
   return (
     <div className="w-full px-3 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-360">
         <div className="mb-5 flex items-center gap-2 px-1">
-          <Music2 className="size-7 fill-[#08b9b2] text-[#08b9b2]" />
+          <MusicIcon className="size-7 text-[#08b9b2]" />
           <div className="group/title flex items-center gap-1">
             <h1 className="text-2xl font-extrabold text-slate-800 sm:text-3xl">
               Music
@@ -362,23 +360,23 @@ export default function MusicDashboard() {
               <Link className="size-5" />
             </a>
           </div>
-          <button
+          {/* <button
             type="button"
             className="ml-1 flex items-center gap-1 text-base font-semibold text-slate-500"
           >
             {dashboard?.genre.name || "Pop"}
             <ChevronDown className="size-5" />
-          </button>
+          </button> */}
         </div>
 
-        {error ? (
+        {isError ? (
           <div className="rounded-2xl bg-white p-10 text-center text-rose-600">
-            {error}
+            Unable to load music charts. Please try again.
           </div>
         ) : !dashboard ? (
           <DashboardSkeleton />
         ) : (
-          <div className="grid items-start gap-6 lg:grid-cols-[minmax(250px,1fr)_minmax(430px,1.75fr)_minmax(250px,1fr)]">
+          <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(250px,1fr)_minmax(430px,1.75fr)_minmax(250px,1fr)]">
             <ArtistChart
               title="Artist"
               entries={dashboard.artists}
@@ -387,7 +385,7 @@ export default function MusicDashboard() {
             <TrendingChart
               entries={dashboard.trending}
               period={period}
-              onPeriodChange={handlePeriodChange}
+              onPeriodChange={setPeriod}
               onFavorite={handleFavorite}
             />
             <ArtistChart
