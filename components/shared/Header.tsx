@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth.store";
-import { Avatar, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Logo from "./Logo";
 
 const navItems = [
@@ -22,6 +22,14 @@ const navItems = [
   { label: "Marketplace", href: "/marketplace" },
   { label: "Voting", href: "/voting" },
 ];
+
+const getInitials = (displayName: string) =>
+  displayName
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("") || "U";
 
 const Header = () => {
   const pathname = usePathname();
@@ -137,11 +145,16 @@ const Header = () => {
             className="flex flex-1 items-center justify-end gap-2 sm:gap-4 cursor-pointer"
           >
             <Avatar>
-              <AvatarImage
-                src={currentUser.avatarUrl || "https://github.com/shadcn.png"}
-                alt={currentUser.displayName}
-                className="grayscale"
-              />
+              {currentUser.avatarUrl ? (
+                <AvatarImage
+                  src={currentUser.avatarUrl}
+                  alt={currentUser.displayName}
+                  referrerPolicy="no-referrer"
+                />
+              ) : null}
+              <AvatarFallback>
+                {getInitials(currentUser.displayName)}
+              </AvatarFallback>
             </Avatar>
           </Link>
         ) : (

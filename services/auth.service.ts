@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { api } from "@/lib/api";
+import { API_BASE_URL, api } from "@/lib/api";
 import { z } from "zod";
 
 // Define schema and data types for login with Zod
@@ -11,6 +11,8 @@ export const loginSchema = z.object({
 export type LoginCredentials = z.infer<typeof loginSchema>;
 
 export const authService = {
+  getGoogleLoginUrl: () => `${API_BASE_URL}/auth/google`,
+
   login: async (credentials: LoginCredentials) => {
     // Change endpoint depending on your actual backend
     const response = await api.post("/auth/login", credentials);
