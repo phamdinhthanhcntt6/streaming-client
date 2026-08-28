@@ -34,7 +34,7 @@ const BannerDashboard = () => {
   }
 
   return (
-    <div className="w-full overflow-hidden bg-white">
+    <div className="w-full overflow-hidden bg-[#ebeef0]">
       <Carousel className="w-full" opts={{ loop: true }} plugins={[autoplay]}>
         <CarouselContent className="ml-0">
           {items.map((item, index) => (

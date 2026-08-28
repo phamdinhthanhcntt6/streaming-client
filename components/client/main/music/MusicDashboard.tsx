@@ -11,7 +11,12 @@ import {
   musicService,
 } from "@/services/music.service";
 import { useAuthStore } from "@/stores/auth.store";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   Heart,
   Link,
@@ -68,12 +73,12 @@ function ArtistChart({
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
-    <section className="flex h-184 min-w-0 flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:p-4">
-      <h2 className="px-2 pb-3 text-xl font-bold text-slate-800 sm:text-2xl">
+    <section className="flex h-160 min-w-0 flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:h-168 lg:h-[calc(100dvh-15rem)] lg:min-h-128 lg:max-h-168">
+      <h2 className="mb-2 flex h-8 shrink-0 items-center px-2 text-xl font-bold text-slate-800 gap-x-1">
         {title}{" "}
         <span className="font-semibold text-slate-500">{entries.length}</span>
       </h2>
-      <div className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="grid min-h-0 flex-1 grid-rows-10 gap-1 overflow-hidden">
         {entries.map((entry) => {
           const selected = selectedId === entry.artist.id;
 
@@ -82,28 +87,28 @@ function ArtistChart({
               type="button"
               key={entry.artist.id}
               onClick={() => setSelectedId(entry.artist.id)}
-              className={`grid w-full grid-cols-[1.5rem_3.5rem_1fr] items-center gap-2 rounded-xl px-2 py-2 text-left transition sm:grid-cols-[1.75rem_3.5rem_1fr] ${
+              className={`grid h-full min-h-0 w-full grid-cols-[1.5rem_3rem_1fr] items-center gap-2 rounded-lg px-2 text-left transition sm:grid-cols-[1.75rem_3rem_1fr] ${
                 selected ? "bg-sky-100/80" : "hover:bg-slate-50"
               }`}
             >
               <span className="text-center text-lg font-semibold text-slate-500">
                 {entry.rank}
               </span>
-              <Avatar className="size-14 rounded-xl">
+              <Avatar className="size-10 rounded-lg">
                 <AvatarImage
                   src={entry.artist.avatarUrl || undefined}
                   alt={entry.artist.name}
-                  className="rounded-xl"
+                  className="rounded-lg"
                 />
-                <AvatarFallback className="rounded-xl font-bold">
+                <AvatarFallback className="rounded-lg font-bold">
                   {entry.artist.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <span className="min-w-0">
-                <span className="block truncate text-base font-bold text-slate-800 sm:text-lg">
+                <span className="block truncate text-base font-bold text-slate-800">
                   {entry.artist.name}
                 </span>
-                <span className="mt-1 block truncate text-xs text-slate-500 sm:text-sm">
+                <span className="mt-0.5 block truncate text-xs text-slate-500">
                   {entry.previousRank ?? "New"} Last · {entry.peakRank} Peak ·{" "}
                   {entry.periodsOnChart} {periodUnit[period]}
                 </span>
@@ -130,13 +135,13 @@ function TrendingChart({
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
 
   return (
-    <section className="flex h-184 min-w-0 flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:p-4">
-      <div className="flex flex-col gap-3 px-2 pb-3 sm:flex-row sm:items-center">
-        <h2 className="flex shrink-0 items-center gap-2 text-xl font-bold text-slate-800 sm:text-2xl">
+    <section className="flex h-160 min-w-0 flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:h-168 lg:h-[calc(100dvh-15rem)] lg:min-h-128 lg:max-h-168">
+      <div className="mb-2 flex h-8 shrink-0 items-center gap-2 px-2">
+        <h2 className="flex shrink-0 items-center gap-2 text-xl font-bold text-slate-800">
           <FireIcon />
           Hot trending
         </h2>
-        <div className="flex items-center gap-5 sm:ml-2">
+        <div className="ml-2 flex items-center gap-4">
           {periodOptions.map((option) => (
             <button
               key={option.value}
@@ -154,18 +159,18 @@ function TrendingChart({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain scrollbar-none [&::-webkit-scrollbar]:hidden">
+      <div className="grid min-h-0 flex-1 grid-rows-[repeat(10,minmax(0,1fr))] gap-1 overflow-hidden">
         {entries.map((entry) => {
           const selected = selectedTrackId === entry.track.id;
 
           return (
             <div
               key={entry.track.id}
-              className={`grid grid-cols-[2rem_1.2rem_4.75rem_minmax(0,1fr)_auto] items-center gap-2 rounded-xl px-2 py-2 transition sm:grid-cols-[2rem_1.5rem_4.75rem_minmax(0,1fr)_auto] ${
+              className={`grid h-full min-h-0 grid-cols-[1.75rem_1.2rem_2.5rem_minmax(0,1fr)_auto] items-center gap-2 rounded-lg px-2 transition sm:grid-cols-[1.75rem_1.25rem_2.5rem_minmax(0,1fr)_auto] ${
                 selected ? "bg-sky-100/80" : "hover:bg-slate-50"
               }`}
             >
-              <span className="text-center text-lg font-semibold text-slate-500">
+              <span className="text-center text-base font-semibold text-slate-500">
                 {entry.rank}
               </span>
               <span className="flex flex-col items-center gap-1 text-[10px] text-slate-500">
@@ -175,24 +180,24 @@ function TrendingChart({
               <button
                 type="button"
                 onClick={() => setSelectedTrackId(entry.track.id)}
-                className="group relative"
+                className="group relative size-10"
                 aria-label={`Play ${entry.track.title}`}
               >
-                <Avatar className="size-19 rounded-xl">
+                <Avatar className="size-10 rounded-lg">
                   <AvatarImage
                     src={entry.track.coverUrl || undefined}
                     alt={entry.track.title}
-                    className="rounded-xl"
+                    className="rounded-lg"
                   />
-                  <AvatarFallback className="rounded-xl bg-slate-200">
+                  <AvatarFallback className="rounded-lg bg-slate-200">
                     <Music2 />
                   </AvatarFallback>
                 </Avatar>
                 <span
-                  className={`absolute inset-0 grid place-items-center rounded-xl bg-slate-950/30 transition ${selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                  className={`absolute inset-0 grid place-items-center rounded-lg bg-slate-950/30 transition ${selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                 >
-                  <span className="grid size-9 place-items-center rounded-full bg-white text-slate-700 shadow">
-                    <Play className="ml-0.5 size-4 fill-current" />
+                  <span className="grid size-6 place-items-center rounded-full bg-white text-slate-700 shadow">
+                    <Play className="ml-0.5 size-3 fill-current" />
                   </span>
                 </span>
               </button>
@@ -201,10 +206,10 @@ function TrendingChart({
                 onClick={() => setSelectedTrackId(entry.track.id)}
                 className="min-w-0 text-left"
               >
-                <span className="block truncate text-base font-bold text-slate-800 sm:text-lg">
+                <span className="block truncate text-base font-bold text-slate-800">
                   {entry.track.title}
                 </span>
-                <span className="mt-1 block truncate text-sm text-slate-500">
+                <span className="mt-0.5 block truncate text-xs text-slate-500 sm:text-sm">
                   {entry.track.artists.map((artist) => artist.name).join(" & ")}
                 </span>
               </button>
@@ -254,11 +259,11 @@ function formatDuration(durationMs: number) {
 
 function DashboardSkeleton() {
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(250px,1fr)_minmax(430px,1.7fr)_minmax(250px,1fr)]">
+    <div className="grid gap-4 lg:grid-cols-[minmax(220px,1fr)_minmax(400px,1.6fr)_minmax(220px,1fr)]">
       {[0, 1, 2].map((column) => (
         <div
           key={column}
-          className="h-184 animate-pulse rounded-2xl bg-white/80"
+          className="h-160 animate-pulse rounded-2xl bg-white/80 sm:h-168 lg:h-[calc(100dvh-15rem)] lg:min-h-128 lg:max-h-168"
         />
       ))}
     </div>
@@ -299,8 +304,9 @@ export default function MusicDashboard() {
 
   const { data: dashboard, isError } = useQuery({
     queryKey: dashboardKey,
-    queryFn: () => musicService.getDashboard(period),
+    queryFn: () => musicService.getDashboard(period, 1, 10),
     enabled: authResolved,
+    placeholderData: keepPreviousData,
   });
 
   const favoriteMutation = useMutation({
@@ -343,14 +349,12 @@ export default function MusicDashboard() {
   };
 
   return (
-    <div className="w-full px-3 py-6 sm:px-6 lg:px-8">
+    <div className="w-full px-3 py-4 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-360">
-        <div className="mb-5 flex items-center gap-2 px-1">
-          <MusicIcon className="size-7 text-[#08b9b2]" />
+        <div className="mb-3 flex items-center gap-2 px-1">
+          <MusicIcon className="size-6 text-[#08b9b2]" />
           <div className="group/title flex items-center gap-1">
-            <h1 className="text-2xl font-extrabold text-slate-800 sm:text-3xl">
-              Music
-            </h1>
+            <h1 className="text-2xl font-extrabold text-slate-800">Music</h1>
             <a
               href="#music"
               aria-label="Link to Music section"
@@ -376,7 +380,7 @@ export default function MusicDashboard() {
         ) : !dashboard ? (
           <DashboardSkeleton />
         ) : (
-          <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(250px,1fr)_minmax(430px,1.75fr)_minmax(250px,1fr)]">
+          <div className="grid items-stretch gap-4 lg:grid-cols-[minmax(220px,1fr)_minmax(400px,1.6fr)_minmax(220px,1fr)]">
             <ArtistChart
               title="Artist"
               entries={dashboard.artists}

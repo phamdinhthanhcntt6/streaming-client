@@ -6,6 +6,8 @@ export interface AuthUser {
   email: string;
   displayName: string;
   avatarUrl?: string | null;
+  provider?: string | null;
+  hasPassword: boolean;
 }
 
 type AuthStatus = "idle" | "loading" | "authenticated" | "unauthenticated";

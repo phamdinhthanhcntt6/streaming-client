@@ -46,12 +46,18 @@ export interface MusicDashboardData {
   artists: RankedArtist[];
   composers: RankedArtist[];
   trending: RankedTrack[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export const musicService = {
-  getDashboard: async (period: ChartPeriod) => {
+  getDashboard: async (period: ChartPeriod, page = 1, limit = 10) => {
     const response = await api.get<MusicDashboardData>("/music/dashboard", {
-      params: { period },
+      params: { period, page, limit },
     });
     return response.data;
   },

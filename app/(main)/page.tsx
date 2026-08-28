@@ -1,5 +1,6 @@
 import BannerDashboard from "@/components/client/main/banner/BannerDashboard";
 import MusicDashboard from "@/components/client/main/music/MusicDashboard";
+import NewSongRelease from "@/components/client/main/music/NewSongRelease";
 import { Link } from "lucide-react";
 
 export const metadata = {
@@ -9,13 +10,17 @@ export const metadata = {
 
 export default function HomePage() {
   return (
-    <>
+    <div className="flex flex-col gap-y-8">
       <section id="music" aria-label="Music">
         <MusicDashboard />
       </section>
 
       <section id="banner" aria-label="Banner">
         <BannerDashboard />
+      </section>
+
+      <section id="new-song-release" aria-label="New Song Release">
+        <NewSongRelease />
       </section>
 
       <section
@@ -38,6 +43,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
