@@ -40,7 +40,7 @@ export default function SettingsTabs() {
   };
 
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mt-4">
       <TabsList className="grid h-12! w-full grid-cols-5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
