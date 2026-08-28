@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky",
+    "precommit": "lint-staged",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -39,6 +43,11 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.4.1",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
