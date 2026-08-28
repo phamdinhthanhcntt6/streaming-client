@@ -1,18 +1,28 @@
 "use client";
 
-import { Menu, Search, Upload } from "lucide-react";
+import { LogOut, Menu, Search, Settings, Upload } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { type MouseEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
+import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/stores/auth.store";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Logo from "./Logo";
 
@@ -33,10 +43,33 @@ const getInitials = (displayName: string) =>
 
 const Header = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const currentUser = useAuthStore((state) => state.user);
   const authStatus = useAuthStore((state) => state.status);
   const fetchMe = useAuthStore((state) => state.fetchMe);
+  const clearUser = useAuthStore((state) => state.clearUser);
+
+  const logoutMutation = useMutation({
+    mutationFn: authService.logout,
+    onSuccess: (data) => {
+      clearUser();
+      queryClient.removeQueries({ queryKey: ["auth"] });
+      void queryClient.invalidateQueries({ queryKey: ["music-dashboard"] });
+
+      toast.success(data?.message || "Logged out successfully");
+      router.replace("/login");
+      router.refresh();
+    },
+    onError: (error: unknown) => {
+      const message = isAxiosError(error)
+        ? error.response?.data?.message
+        : undefined;
+
+      toast.error(message || "Logout failed. Please try again.");
+    },
+  });
 
   useEffect(() => {
     void fetchMe();
@@ -140,23 +173,54 @@ const Header = () => {
             aria-label="Loading account"
           />
         ) : currentUser ? (
-          <Link
-            href="/setting?tab=account"
-            className="flex flex-1 items-center justify-end gap-2 sm:gap-4 cursor-pointer"
-          >
-            <Avatar>
-              {currentUser.avatarUrl ? (
-                <AvatarImage
-                  src={currentUser.avatarUrl}
-                  alt={currentUser.displayName}
-                  referrerPolicy="no-referrer"
-                />
-              ) : null}
-              <AvatarFallback>
-                {getInitials(currentUser.displayName)}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
+          <div className="flex flex-1 justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <button
+                    type="button"
+                    aria-label="Open account menu"
+                    className="cursor-pointer rounded-full outline-none ring-offset-2 transition focus-visible:ring-2 focus-visible:ring-[#09bcae]"
+                  >
+                    <Avatar>
+                      {currentUser.avatarUrl ? (
+                        <AvatarImage
+                          src={currentUser.avatarUrl}
+                          alt={currentUser.displayName}
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : null}
+                      <AvatarFallback>
+                        {getInitials(currentUser.displayName)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                }
+              />
+              <DropdownMenuContent
+                align="end"
+                sideOffset={8}
+                className="w-48 p-1.5"
+              >
+                <DropdownMenuItem
+                  onClick={() => router.push("/setting?tab=account")}
+                  className="cursor-pointer gap-2 px-3 py-2"
+                >
+                  <Settings />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  disabled={logoutMutation.isPending}
+                  onClick={() => logoutMutation.mutate()}
+                  className="cursor-pointer gap-2 px-3 py-2"
+                >
+                  <LogOut />
+                  {logoutMutation.isPending ? "Logging out..." : "Log out"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         ) : (
           <div className="flex flex-1 items-center justify-end gap-2 sm:gap-4">
             <Button
