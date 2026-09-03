@@ -5,7 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
-variable: "--font-geist-sans",
+  variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="mx-auto flex min-h-screen w-full max-w-360 flex-col">
+      <body className="flex min-h-screen w-full flex-col">
         <QueryProvider>{children}</QueryProvider>
         <Toaster position="top-right" richColors closeButton />
       </body>

@@ -3,19 +3,19 @@
 import KeyIcon from "@/components/icons/KeyIcon";
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-    authService,
-    createChangePasswordSchema,
-    type ChangePasswordBody,
+  authService,
+  createChangePasswordSchema,
+  type ChangePasswordBody,
 } from "@/services/auth.service";
 import { useAuthStore } from "@/stores/auth.store";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -99,14 +99,14 @@ const ResetPasswordDialog = ({ hasPassword }: Props) => {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-max cursor-pointer rounded-lg border border-gray-100 bg-[#f9f9f9] px-2.5 py-1 text-left text-blue-500 hover:underline ring-0"
+        className="w-max cursor-pointer rounded-lg border border-gray-100 bg-[#f9f9f9] px-2.5 py-1 text-left text-blue-500 ring-0 hover:underline"
       >
         {hasPassword ? "Change password" : "Set password"}
       </button>
 
       <DialogContent>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-          <DialogHeader className="flex flex-col text-center items-center">
+          <DialogHeader className="flex flex-col items-center text-center">
             <KeyIcon />
             <DialogTitle>
               {hasPassword ? "Change your password" : "Set your password"}

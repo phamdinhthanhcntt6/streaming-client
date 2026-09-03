@@ -9,7 +9,9 @@ export default function MainLayout({
   return (
     <div className="flex min-h-screen flex-1 flex-col">
       <Header />
-      <main className="flex flex-1 flex-col mt-2">{children}</main>
+      <main className="mx-auto mt-2 flex w-full max-w-360 flex-1 flex-col">
+        {children}
+      </main>
       <Footer />
     </div>
   );
