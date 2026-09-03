@@ -12,6 +12,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getApiError, getApiErrorMessage } from "@/lib/api-error";
 import {
   authService,
   createChangePasswordSchema,
@@ -19,7 +20,6 @@ import {
 } from "@/services/auth.service";
 import { useAuthStore } from "@/stores/auth.store";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { isAxiosError } from "axios";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -42,6 +42,7 @@ const ResetPasswordDialog = ({ hasPassword }: Props) => {
     handleSubmit,
     register,
     reset,
+    setError,
     formState: { errors },
   } = useForm<ChangePasswordBody>({
     resolver: zodResolver(passwordSchema),
@@ -84,11 +85,24 @@ const ResetPasswordDialog = ({ hasPassword }: Props) => {
       reset();
       setOpen(false);
     } catch (error: unknown) {
-      const message = isAxiosError(error)
-        ? error.response?.data?.message
-        : undefined;
+      const apiError = getApiError(error);
 
-      toast.error(message || "Unable to update password. Please try again.");
+      for (const fieldError of apiError.errors) {
+        if (
+          fieldError.field === "currentPassword" ||
+          fieldError.field === "newPassword" ||
+          fieldError.field === "confirmPassword"
+        ) {
+          setError(fieldError.field, { message: fieldError.message });
+        }
+      }
+
+      toast.error(
+        getApiErrorMessage(
+          error,
+          "Unable to update password. Please try again.",
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }

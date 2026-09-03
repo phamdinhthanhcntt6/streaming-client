@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import DeleteAccountDialog from "./DeleteAccountDialog";
 import ResetPasswordDialog from "./ResetPasswordDialog";
 
 interface ProfileFormValues {
@@ -17,6 +18,7 @@ const AccountTab = () => {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const authStatus = useAuthStore((state) => state.status);
+
   const { register, reset } = useForm<ProfileFormValues>({
     defaultValues: { displayName: "", email: "" },
   });
@@ -34,9 +36,9 @@ const AccountTab = () => {
   }, [authStatus, router]);
 
   return (
-    <div className="flex gap-4 w-full h-full">
-      <div className="flex flex-col h-full bg-[#FFFFFF] shadow-xs border border-gray-100 rounded-lg p-6 w-2/3">
-        <span className="font-semibold text-2xl text-[#2C2F33]">Profile</span>
+    <div className="flex h-full w-full gap-4">
+      <div className="flex h-full w-2/3 flex-col rounded-lg border border-gray-100 bg-[#FFFFFF] p-6 shadow-xs">
+        <span className="text-2xl font-semibold text-[#2C2F33]">Profile</span>
         <div className="mt-4 grid max-w-xl gap-4">
           <div className="grid gap-2 sm:grid-cols-[7rem_minmax(0,1fr)] sm:items-center sm:gap-4">
             <Label htmlFor="accountEmail">Email</Label>
@@ -53,7 +55,7 @@ const AccountTab = () => {
           </div>
         </div>
 
-        <span className="font-semibold text-2xl text-[#2C2F33]">
+        <span className="text-2xl font-semibold text-[#2C2F33]">
           Basic Information
         </span>
 
@@ -66,10 +68,10 @@ const AccountTab = () => {
             <Input id="displayName" {...register("displayName")} />
           </div>
         </form>
-
+        <DeleteAccountDialog hasPassword={Boolean(user?.hasPassword)} />
       </div>
-      <div className="flex h-full bg-[#FFFFFF] shadow-xs border border-gray-100 rounded-lg p-6 w-1/3">
-        <span className="font-semibold text-5 text-[#2C2F33]">
+      <div className="flex h-full w-1/3 rounded-lg border border-gray-100 bg-[#FFFFFF] p-6 shadow-xs">
+        <span className="text-5 font-semibold text-[#2C2F33]">
           Login with social networks
         </span>
       </div>

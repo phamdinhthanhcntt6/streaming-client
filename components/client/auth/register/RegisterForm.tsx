@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getApiError, getApiErrorMessage } from "@/lib/api-error";
 import { authService } from "@/services/auth.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
@@ -28,6 +28,7 @@ export default function RegisterForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<RegisterCredentials>({
     resolver: zodResolver(registerSchema),
@@ -49,9 +50,17 @@ export default function RegisterForm() {
       const data = await authService.register(payload);
       toast.success(data?.message || "Registration successful");
       router.push("/login");
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const apiError = getApiError(error);
+
+      for (const fieldError of apiError.errors) {
+        if (fieldError.field === "email" || fieldError.field === "password") {
+          setError(fieldError.field, { message: fieldError.message });
+        }
+      }
+
       toast.error(
-        err.response?.data?.message || "Registration failed. Please try again.",
+        getApiErrorMessage(error, "Registration failed. Please try again."),
       );
     } finally {
       setIsLoading(false);
@@ -69,7 +78,7 @@ export default function RegisterForm() {
           placeholder="name@example.com"
           {...register("email")}
           disabled={isLoading}
-          className="bg-gray-50 border-gray-200 h-11"
+          className="h-11 border-gray-200 bg-gray-50"
         />
         {errors.email && (
           <p className="text-sm font-medium text-destructive">
@@ -89,12 +98,12 @@ export default function RegisterForm() {
             placeholder="Your password"
             {...register("password")}
             disabled={isLoading}
-            className="bg-gray-50 border-gray-200 h-11 pr-10"
+            className="h-11 border-gray-200 bg-gray-50 pr-10"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600"
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -108,7 +117,7 @@ export default function RegisterForm() {
 
       <Button
         type="submit"
-        className="w-full h-11 font-semibold bg-[#A1ABB2] hover:bg-gray-500 text-white rounded-md mt-4"
+        className="mt-4 h-11 w-full rounded-md bg-[#A1ABB2] font-semibold text-white hover:bg-gray-500"
         disabled={isLoading}
       >
         {isLoading ? "Creating..." : "Create account"}

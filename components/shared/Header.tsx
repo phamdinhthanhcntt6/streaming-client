@@ -18,10 +18,10 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/stores/auth.store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Logo from "./Logo";
@@ -63,11 +63,9 @@ const Header = () => {
       router.refresh();
     },
     onError: (error: unknown) => {
-      const message = isAxiosError(error)
-        ? error.response?.data?.message
-        : undefined;
-
-      toast.error(message || "Logout failed. Please try again.");
+      toast.error(
+        getApiErrorMessage(error, "Logout failed. Please try again."),
+      );
     },
   });
 
@@ -120,7 +118,7 @@ const Header = () => {
         onClick={(event) => handleSectionNavigation(event, item.href)}
         aria-current={isActive ? "page" : undefined}
         className={cn(
-          "mx-4 flex h-12 -translate-y-5 items-center justify-center rounded-2xl text-sm font-semibold uppercase tracking-wide transition-colors lg:mx-8",
+          "mx-4 flex h-12 -translate-y-5 items-center justify-center rounded-2xl text-sm font-semibold tracking-wide uppercase transition-colors lg:mx-8",
           isActive
             ? "bg-[#01579B] text-white hover:bg-[#014b87]"
             : "text-slate-400 hover:bg-slate-50 hover:text-[#01579B]",
@@ -160,10 +158,7 @@ const Header = () => {
           </form>
         </div>
 
-        <Link
-          href="/"
-          className="text-base font-bold text-[#09bcae] md:hidden"
-        >
+        <Link href="/" className="text-base font-bold text-[#09bcae] md:hidden">
           LOGO
         </Link>
 
@@ -180,7 +175,7 @@ const Header = () => {
                   <button
                     type="button"
                     aria-label="Open account menu"
-                    className="cursor-pointer rounded-full outline-none ring-offset-2 transition focus-visible:ring-2 focus-visible:ring-[#09bcae]"
+                    className="cursor-pointer rounded-full ring-offset-2 transition outline-none focus-visible:ring-2 focus-visible:ring-[#09bcae]"
                   >
                     <Avatar>
                       {currentUser.avatarUrl ? (
@@ -234,7 +229,7 @@ const Header = () => {
             </Button>
             <Link
               href="/login"
-              className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-[#09bcae] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#08a99d] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#09bcae]/30 sm:px-7"
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-[#09bcae] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#08a99d] focus-visible:ring-3 focus-visible:ring-[#09bcae]/30 focus-visible:outline-none sm:px-7"
             >
               Sign in
             </Link>

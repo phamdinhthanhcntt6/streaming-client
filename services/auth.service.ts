@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { API_BASE_URL, api } from "@/lib/api";
 import { z } from "zod";
 
@@ -9,32 +8,38 @@ export const loginSchema = z.object({
 
 export type LoginCredentials = z.infer<typeof loginSchema>;
 
+export interface RegisterBody {
+  email: string;
+  password: string;
+  displayName: string;
+}
+
 export const createChangePasswordSchema = (hasPassword: boolean) =>
   z
-  .object({
-    currentPassword: z.string().optional(),
-    newPassword: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z
-      .string()
-      .min(6, "Password must be at least 6 characters"),
-  })
-  .superRefine((data, context) => {
-    if (hasPassword && !data.currentPassword?.trim()) {
-      context.addIssue({
-        code: "custom",
-        message: "Current password is required",
-        path: ["currentPassword"],
-      });
-    }
+    .object({
+      currentPassword: z.string().optional(),
+      newPassword: z.string().min(6, "Password must be at least 6 characters"),
+      confirmPassword: z
+        .string()
+        .min(6, "Password must be at least 6 characters"),
+    })
+    .superRefine((data, context) => {
+      if (hasPassword && !data.currentPassword?.trim()) {
+        context.addIssue({
+          code: "custom",
+          message: "Current password is required",
+          path: ["currentPassword"],
+        });
+      }
 
-    if (data.newPassword !== data.confirmPassword) {
-      context.addIssue({
-        code: "custom",
-        message: "Passwords do not match",
-        path: ["confirmPassword"],
-      });
-    }
-  });
+      if (data.newPassword !== data.confirmPassword) {
+        context.addIssue({
+          code: "custom",
+          message: "Passwords do not match",
+          path: ["confirmPassword"],
+        });
+      }
+    });
 
 export type ChangePasswordBody = z.infer<
   ReturnType<typeof createChangePasswordSchema>
@@ -53,7 +58,7 @@ export const authService = {
     return response.data;
   },
 
-  register: async (data: any) => {
+  register: async (data: RegisterBody) => {
     const response = await api.post("/auth/register", data);
     return response.data;
   },
@@ -73,6 +78,13 @@ export const authService = {
       "/auth/change-password",
       data,
     );
+    return response.data;
+  },
+
+  deleteAccount: async (password?: string) => {
+    const response = await api.delete("/auth/delete-account", {
+      data: { password },
+    });
     return response.data;
   },
 };

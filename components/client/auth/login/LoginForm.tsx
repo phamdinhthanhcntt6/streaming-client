@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getApiError, getApiErrorMessage } from "@/lib/api-error";
 import {
   authService,
   LoginCredentials,
@@ -25,6 +25,7 @@ export default function LoginForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<LoginCredentials>({
     resolver: zodResolver(loginSchema),
@@ -43,10 +44,16 @@ export default function LoginForm() {
 
       toast.success(data?.message || "Login successful");
       router.push("/music");
-    } catch (err: any) {
-      toast.error(
-        err.response?.data?.message || "Login failed. Please try again.",
-      );
+    } catch (error: unknown) {
+      const apiError = getApiError(error);
+
+      for (const fieldError of apiError.errors) {
+        if (fieldError.field === "email" || fieldError.field === "password") {
+          setError(fieldError.field, { message: fieldError.message });
+        }
+      }
+
+      toast.error(getApiErrorMessage(error, "Login failed. Please try again."));
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +70,7 @@ export default function LoginForm() {
           placeholder="name@example.com"
           {...register("email")}
           disabled={isLoading}
-          className="bg-gray-50 border-gray-200 h-11"
+          className="h-11 border-gray-200 bg-gray-50"
         />
         {errors.email && (
           <p className="text-sm font-medium text-destructive">
@@ -82,7 +89,7 @@ export default function LoginForm() {
           placeholder="Your password"
           {...register("password")}
           disabled={isLoading}
-          className="bg-gray-50 border-gray-200 h-11"
+          className="h-11 border-gray-200 bg-gray-50"
         />
         {errors.password && (
           <p className="text-sm font-medium text-destructive">
@@ -93,7 +100,7 @@ export default function LoginForm() {
 
       <Button
         type="submit"
-        className="w-full h-11 font-semibold bg-[#A1ABB2] hover:bg-gray-500 text-white rounded-md mt-4"
+        className="mt-4 h-11 w-full rounded-md bg-[#A1ABB2] font-semibold text-white hover:bg-gray-500"
         disabled={isLoading}
       >
         {isLoading ? "Processing..." : "Log in"}
@@ -102,7 +109,7 @@ export default function LoginForm() {
       <div className="mt-4 text-center">
         <Link
           href="/forgot-password"
-          className="text-sm font-medium text-gray-500 hover:text-gray-900 underline underline-offset-4"
+          className="text-sm font-medium text-gray-500 underline underline-offset-4 hover:text-gray-900"
         >
           Forget password?
         </Link>

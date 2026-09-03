@@ -2,6 +2,7 @@
 
 import FireIcon from "@/components/icons/FireIcon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getApiErrorMessage } from "@/lib/api-error";
 import {
   type ChartMovement,
   type ChartPeriod,
@@ -73,8 +74,8 @@ function ArtistChart({
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
-    <section className="flex h-160 min-w-0 flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:h-168 lg:h-[calc(100dvh-15rem)] lg:min-h-128 lg:max-h-168">
-      <h2 className="mb-2 flex h-8 shrink-0 items-center px-2 text-xl font-bold text-slate-800 gap-x-1">
+    <section className="flex h-160 min-w-0 flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:h-168 lg:h-[calc(100dvh-15rem)] lg:max-h-168 lg:min-h-128">
+      <h2 className="mb-2 flex h-8 shrink-0 items-center gap-x-1 px-2 text-xl font-bold text-slate-800">
         {title}{" "}
         <span className="font-semibold text-slate-500">{entries.length}</span>
       </h2>
@@ -135,7 +136,7 @@ function TrendingChart({
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
 
   return (
-    <section className="flex h-160 min-w-0 flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:h-168 lg:h-[calc(100dvh-15rem)] lg:min-h-128 lg:max-h-168">
+    <section className="flex h-160 min-w-0 flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_8px_30px_rgba(15,23,42,0.04)] sm:h-168 lg:h-[calc(100dvh-15rem)] lg:max-h-168 lg:min-h-128">
       <div className="mb-2 flex h-8 shrink-0 items-center gap-2 px-2">
         <h2 className="flex shrink-0 items-center gap-2 text-xl font-bold text-slate-800">
           <FireIcon />
@@ -263,7 +264,7 @@ function DashboardSkeleton() {
       {[0, 1, 2].map((column) => (
         <div
           key={column}
-          className="h-160 animate-pulse rounded-2xl bg-white/80 sm:h-168 lg:h-[calc(100dvh-15rem)] lg:min-h-128 lg:max-h-168"
+          className="h-160 animate-pulse rounded-2xl bg-white/80 sm:h-168 lg:h-[calc(100dvh-15rem)] lg:max-h-168 lg:min-h-128"
         />
       ))}
     </div>
@@ -302,7 +303,13 @@ export default function MusicDashboard() {
     authStatus === "authenticated" || authStatus === "unauthenticated";
   const dashboardKey = ["music-dashboard", period, authStatus] as const;
 
-  const { data: dashboard, isError } = useQuery({
+  const {
+    data: dashboard,
+    error: dashboardError,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: dashboardKey,
     queryFn: () => musicService.getDashboard(period, 1, 10),
     enabled: authResolved,
@@ -331,11 +338,16 @@ export default function MusicDashboard() {
 
       return { previous };
     },
-    onError: (_error, _entry, context) => {
+    onError: (error, _entry, context) => {
       if (context?.previous) {
         queryClient.setQueryData(dashboardKey, context.previous);
       }
-      toast.error("Unable to update favorite. Please try again.");
+      toast.error(
+        getApiErrorMessage(
+          error,
+          "Unable to update favorite. Please try again.",
+        ),
+      );
     },
   });
 
@@ -359,7 +371,7 @@ export default function MusicDashboard() {
               href="#music"
               aria-label="Link to Music section"
               title="Link to Music section"
-              className="grid size-8 place-items-center rounded-lg text-slate-400 opacity-0 transition hover:bg-white hover:text-[#08b9b2] focus-visible:opacity-100 group-hover/title:opacity-100"
+              className="grid size-8 place-items-center rounded-lg text-slate-400 opacity-0 transition group-hover/title:opacity-100 hover:bg-white hover:text-[#08b9b2] focus-visible:opacity-100"
             >
               <Link className="size-5" />
             </a>
@@ -374,8 +386,24 @@ export default function MusicDashboard() {
         </div>
 
         {isError ? (
-          <div className="rounded-2xl bg-white p-10 text-center text-rose-600">
-            Unable to load music charts. Please try again.
+          <div
+            role="alert"
+            className="rounded-2xl bg-white p-10 text-center text-rose-600"
+          >
+            <p>
+              {getApiErrorMessage(
+                dashboardError,
+                "Unable to load music charts. Please try again.",
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              disabled={isFetching}
+              className="mt-4 rounded-lg bg-[#01579B] px-4 py-2 font-semibold text-white disabled:opacity-60"
+            >
+              {isFetching ? "Trying again..." : "Try again"}
+            </button>
           </div>
         ) : !dashboard ? (
           <DashboardSkeleton />
