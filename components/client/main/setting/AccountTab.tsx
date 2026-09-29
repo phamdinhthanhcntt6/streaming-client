@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/stores/auth.store";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import DeleteAccountDialog from "./DeleteAccountDialog";
 import ResetPasswordDialog from "./ResetPasswordDialog";
@@ -14,7 +14,7 @@ interface ProfileFormValues {
   email: string;
 }
 
-const AccountTab = () => {
+const AccountTab = ({ verification }: { verification: ReactNode }) => {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const authStatus = useAuthStore((state) => state.status);
@@ -52,6 +52,10 @@ const AccountTab = () => {
           <div className="grid gap-2 sm:grid-cols-[7rem_minmax(0,1fr)] sm:items-center sm:gap-4">
             <Label>Password</Label>
             <ResetPasswordDialog hasPassword={Boolean(user?.hasPassword)} />
+          </div>
+          <div className="grid gap-2 sm:grid-cols-[7rem_minmax(0,1fr)] sm:items-center sm:gap-4">
+            <Label>Verification</Label>
+            {verification}
           </div>
         </div>
 

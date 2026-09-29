@@ -1,12 +1,24 @@
 import { authService } from "@/services/auth.service";
 import { create } from "zustand";
 
+export type UserRole = "USER" | "ADMIN";
+
+/** The artist profile this account manages, or null if it has not claimed one. */
+export interface OwnedArtist {
+  id: string;
+  slug: string;
+  name: string;
+  isVerified: boolean;
+}
+
 export interface AuthUser {
   id: string;
   email: string;
   displayName: string;
   avatarUrl?: string | null;
   provider?: string | null;
+  role: UserRole;
+  artist: OwnedArtist | null;
   hasPassword: boolean;
 }
 
