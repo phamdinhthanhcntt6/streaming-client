@@ -1,6 +1,7 @@
 "use client";
 
 import FireIcon from "@/components/icons/FireIcon";
+import { SkeletonMusicDashboard } from "@/components/shared/ApiSkeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getApiErrorMessage } from "@/lib/api-error";
 import {
@@ -258,19 +259,6 @@ function formatDuration(durationMs: number) {
   return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
-function DashboardSkeleton() {
-  return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(220px,1fr)_minmax(400px,1.6fr)_minmax(220px,1fr)]">
-      {[0, 1, 2].map((column) => (
-        <div
-          key={column}
-          className="h-160 animate-pulse rounded-2xl bg-white/80 sm:h-168 lg:h-[calc(100dvh-15rem)] lg:max-h-168 lg:min-h-128"
-        />
-      ))}
-    </div>
-  );
-}
-
 const setFavoriteInDashboard = (
   data: MusicDashboardData,
   trackId: string,
@@ -406,7 +394,7 @@ export default function MusicDashboard() {
             </button>
           </div>
         ) : !dashboard ? (
-          <DashboardSkeleton />
+          <SkeletonMusicDashboard />
         ) : (
           <div className="grid items-stretch gap-4 lg:grid-cols-[minmax(220px,1fr)_minmax(400px,1.6fr)_minmax(220px,1fr)]">
             <ArtistChart

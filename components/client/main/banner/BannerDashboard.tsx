@@ -1,5 +1,6 @@
 "use client";
 
+import { SkeletonBanner } from "@/components/shared/ApiSkeleton";
 import {
   Carousel,
   CarouselContent,
@@ -34,7 +35,7 @@ const BannerDashboard = () => {
   });
 
   if (isPending) {
-    return <div className="aspect-33/7 w-full animate-pulse bg-slate-100" />;
+    return <SkeletonBanner />;
   }
 
   if (isError) {
